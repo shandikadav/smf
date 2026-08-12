@@ -56,14 +56,104 @@ dart pub get
 
 ### Compile to Binary
 
+#### macOS
+
 ```bash
 dart compile exe bin/main.dart -o build/smf
 ```
 
-Then add `build/` to your `PATH` or move the binary to `/usr/local/bin/`:
+Install globally:
 
 ```bash
-cp build/smf /usr/local/bin/smf
+sudo cp build/smf /usr/local/bin/smf
+```
+
+Or add to your shell profile (`~/.zshrc` or `~/.bash_profile`):
+
+```bash
+export PATH="$PATH:/path/to/setup-my-project/build"
+```
+
+Then reload:
+
+```bash
+source ~/.zshrc
+```
+
+#### Linux
+
+```bash
+dart compile exe bin/main.dart -o build/smf
+```
+
+Install globally:
+
+```bash
+sudo cp build/smf /usr/local/bin/smf
+sudo chmod +x /usr/local/bin/smf
+```
+
+Or add to your shell profile (`~/.bashrc` or `~/.zshrc`):
+
+```bash
+export PATH="$PATH:/path/to/setup-my-project/build"
+```
+
+Then reload:
+
+```bash
+source ~/.bashrc
+```
+
+#### Windows
+
+```powershell
+dart compile exe bin/main.dart -o build/smf.exe
+```
+
+**Option 1 — Move to a directory already in PATH:**
+
+```powershell
+copy build\smf.exe C:\Windows\System32\smf.exe
+```
+
+**Option 2 — Add build folder to PATH:**
+
+1. Open **Start Menu** → search **"Environment Variables"**
+2. Click **"Edit the system environment variables"**
+3. Click **Environment Variables...**
+4. Under **User variables**, select **Path** → click **Edit**
+5. Click **New** → add the full path to the `build` folder (e.g. `C:\Users\you\setup-my-project\build`)
+6. Click **OK** → restart your terminal
+
+Or via PowerShell (current user only):
+
+```powershell
+$env:Path += ";C:\path\to\setup-my-project\build"
+[Environment]::SetEnvironmentVariable("Path", $env:Path, "User")
+```
+
+### Verify Installation
+
+After installing on any platform, verify it works:
+
+```bash
+smf --help
+```
+
+Expected output:
+
+```
+🚀 Setup My Flutter — Scaffold Flutter projects with Feature-First architecture.
+
+Usage: smf <command> [arguments]
+
+Global options:
+-h, --help    Print this usage information.
+
+Available commands:
+  create     Create a new Flutter project with Feature-First architecture.
+  generate   Generate project components (features, etc.).
 ```
 
 ---
