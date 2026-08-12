@@ -4,22 +4,6 @@ A CLI tool for scaffolding Flutter projects with **Feature-First** architecture.
 
 ---
 
-## 📋 Table of Contents
-
-- [Features](#-features)
-- [Requirements](#-requirements)
-- [Installation](#-installation)
-- [Usage](#-usage)
-  - [Create Project](#create-project)
-  - [Generate Feature](#generate-feature)
-- [Project Presets](#-project-presets)
-- [Generated Structure](#-generated-structure)
-- [Architecture](#-architecture)
-- [Development](#-development)
-- [License](#-license)
-
----
-
 ## ✨ Features
 
 - **Interactive CLI** — Guided wizard with prompts for project configuration
@@ -44,135 +28,49 @@ A CLI tool for scaffolding Flutter projects with **Feature-First** architecture.
 
 ---
 
-## 🔧 Installation
+## 📖 Guide
 
-### From Source (Development)
+### 1. Install the package
 
-```bash
-git clone <repo-url>
-cd setup-my-project
-dart pub get
-```
-
-### Compile to Binary
-
-#### macOS
+**Option A — Global activate (recommended):**
 
 ```bash
-dart compile exe bin/main.dart -o build/smf
+dart pub global activate --source path .
 ```
 
-Install globally:
+Now you can use `smf` from anywhere:
 
 ```bash
-sudo cp build/smf /usr/local/bin/smf
-```
-
-Or add to your shell profile (`~/.zshrc` or `~/.bash_profile`):
-
-```bash
-export PATH="$PATH:/path/to/setup-my-project/build"
-```
-
-Then reload:
-
-```bash
-source ~/.zshrc
-```
-
-#### Linux
-
-```bash
-dart compile exe bin/main.dart -o build/smf
-```
-
-Install globally:
-
-```bash
-sudo cp build/smf /usr/local/bin/smf
-sudo chmod +x /usr/local/bin/smf
-```
-
-Or add to your shell profile (`~/.bashrc` or `~/.zshrc`):
-
-```bash
-export PATH="$PATH:/path/to/setup-my-project/build"
-```
-
-Then reload:
-
-```bash
-source ~/.bashrc
-```
-
-#### Windows
-
-```powershell
-dart compile exe bin/main.dart -o build/smf.exe
-```
-
-**Option 1 — Move to a directory already in PATH:**
-
-```powershell
-copy build\smf.exe C:\Windows\System32\smf.exe
-```
-
-**Option 2 — Add build folder to PATH:**
-
-1. Open **Start Menu** → search **"Environment Variables"**
-2. Click **"Edit the system environment variables"**
-3. Click **Environment Variables...**
-4. Under **User variables**, select **Path** → click **Edit**
-5. Click **New** → add the full path to the `build` folder (e.g. `C:\Users\you\setup-my-project\build`)
-6. Click **OK** → restart your terminal
-
-Or via PowerShell (current user only):
-
-```powershell
-$env:Path += ";C:\path\to\setup-my-project\build"
-[Environment]::SetEnvironmentVariable("Path", $env:Path, "User")
-```
-
-### Verify Installation
-
-After installing on any platform, verify it works:
-
-```bash
-smf --help
-```
-
-Expected output:
-
-```
-🚀 Setup My Flutter — Scaffold Flutter projects with Feature-First architecture.
-
-Usage: smf <command> [arguments]
-
-Global options:
--h, --help    Print this usage information.
-
-Available commands:
-  create     Create a new Flutter project with Feature-First architecture.
-  generate   Generate project components (features, etc.).
-```
-
----
-
-## 🚀 Usage
-
-### Create Project
-
-Create a new Flutter project with Feature-First architecture:
-
-```bash
-# From source
-dart run bin/main.dart create
-
-# From compiled binary
 smf create
+smf generate feature auth
 ```
 
-The CLI will guide you through an interactive wizard:
+**Option B — Add as a dev dependency in your project:**
+
+```yaml
+dev_dependencies:
+  setup_my_flutter:
+    git:
+      url: <repo-url>
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+### 2. Create a new project
+
+```bash
+# If globally activated
+smf create
+
+# If added as dev dependency
+dart run setup_my_flutter create
+```
+
+The CLI will walk you through an interactive wizard:
 
 ```
 ? Project name (snake_case): my_awesome_app
@@ -193,47 +91,35 @@ The CLI will guide you through an interactive wizard:
 ? Proceed with creation? (Y/n): Y
 ```
 
-#### What Happens During `create`:
+What happens under the hood:
 
-1. ✅ Validates project name (snake_case)
-2. ✅ Runs `flutter create` → auto-rollback on failure
-3. ✅ Injects all dependencies via `flutter pub add`
-4. ✅ Injects dev dependencies (`envied_generator`, `build_runner`, etc.)
-5. ✅ Generates Feature-First folder structure via Mason brick
-6. ✅ Generates home feature with selected state management
-7. ✅ Creates `.env` file for envied configuration
+1. Validates project name (snake_case)
+2. Runs `flutter create` with auto-rollback on failure
+3. Injects all dependencies via `flutter pub add`
+4. Generates Feature-First folder structure via Mason brick
+5. Creates `.env` file for envied configuration
 
----
+### 3. Generate a new feature
 
-### Generate Feature
-
-Add a new feature to an existing project:
+Navigate to your Flutter project root, then:
 
 ```bash
-# From source
-dart run bin/main.dart generate feature auth
-
-# From compiled binary
+# If globally activated
 smf generate feature auth
+
+# If added as dev dependency
+dart run setup_my_flutter generate feature auth
 ```
 
-#### Options
-
-| Flag | Shorthand | Description |
-|---|---|---|
-| `--force` | `-f` | Overwrite feature directory if it already exists |
-
-#### Example with Force
+To overwrite an existing feature, use the `--force` flag:
 
 ```bash
 smf generate feature auth --force
 ```
 
-#### Auto-Detection
-
-This command automatically detects the state management in use from `pubspec.yaml`:
-- If `flutter_bloc` is found → generates BLoC files (event, state, bloc)
-- If `flutter_riverpod` is found → generates Riverpod provider files
+The command auto-detects your state management from `pubspec.yaml`:
+- `flutter_bloc` found → generates BLoC files (event, state, bloc)
+- `flutter_riverpod` found → generates Riverpod provider files
 
 ---
 
@@ -254,8 +140,6 @@ Lightweight setup for rapid prototyping or small-to-medium projects.
 Dev dependencies: `envied_generator`, `build_runner`
 
 ### Enterprise
-
-Full-featured setup for production-grade projects.
 
 All MVP packages **plus**:
 
@@ -340,56 +224,51 @@ lib/features/<feature_name>/
 
 ## 🏛 Architecture
 
-### CLI Architecture
-
 ```
 bin/
-└── main.dart                     # Entry point & CommandRunner
+├── main.dart                     # CLI entry point (smf)
+├── setup_my_flutter.dart         # Package entry point (dart run setup_my_flutter)
+└── create.dart                   # Direct create (dart run setup_my_flutter:create)
 lib/
 ├── setup_my_flutter.dart         # Library barrel export
 └── src/
-    ├── commands/                  # CLI commands
-    │   ├── create_command.dart    # `smf create`
-    │   ├── generate_command.dart  # `smf generate` (parent)
-    │   ├── generate_feature_command.dart  # `smf generate feature`
-    │   └── presets.dart           # Package preset definitions
-    ├── core/                      # Infrastructure
-    │   ├── cli_exception.dart     # User-friendly error handling
-    │   ├── rollback.dart          # Cleanup on failure
-    │   └── shell_runner.dart      # Process.run wrapper
-    ├── templates/                 # Mason bricks
+    ├── commands/
+    │   ├── create_command.dart
+    │   ├── generate_command.dart
+    │   ├── generate_feature_command.dart
+    │   └── presets.dart
+    ├── core/
+    │   ├── cli_exception.dart
+    │   ├── rollback.dart
+    │   └── shell_runner.dart
+    ├── templates/
     │   └── bricks/
-    │       ├── project_structure/ # Full project template
-    │       └── feature/           # Individual feature template
-    └── utils/                     # Helpers
-        ├── file_manager.dart      # File system operations
-        └── string_utils.dart      # Validation & casing
+    │       ├── project_structure/
+    │       └── feature/
+    └── utils/
+        ├── file_manager.dart
+        └── string_utils.dart
 ```
 
 ### Design Principles
 
 1. **Rollback Safety** — Every created directory is tracked. If the process fails, everything is automatically cleaned up to prevent dirty state.
-
 2. **No Raw pubspec.yaml Edits** — Dependencies are always added via `flutter pub add`, never through string manipulation.
-
 3. **User-Friendly Errors** — All exceptions are wrapped in `CliException` with clear messages and mitigation steps. No raw stack traces are shown to the user.
-
 4. **Idempotency** — `generate feature` will not overwrite an existing folder unless the `--force` flag is explicitly provided.
-
 5. **Validation First** — Project and feature names are validated before any subprocess is executed.
 
 ---
 
 ## 🛠 Development
 
-### Commands
-
 ```bash
 # Install dependencies
 dart pub get
 
 # Run CLI locally
-dart run bin/main.dart <command> [arguments]
+dart run bin/main.dart create
+dart run bin/main.dart generate feature auth
 
 # Analyze code
 dart analyze
@@ -400,8 +279,9 @@ dart format .
 # Run tests
 dart test
 
-# Compile to executable
-dart compile exe bin/main.dart -o build/smf
+# Compile to standalone binary
+dart compile exe bin/main.dart -o build/smf          # macOS / Linux
+dart compile exe bin/main.dart -o build/smf.exe      # Windows
 ```
 
 ### Tech Stack
@@ -414,20 +294,6 @@ dart compile exe bin/main.dart -o build/smf
 | YAML Manipulation | `yaml_edit` |
 | Path Resolution | `path` |
 | Testing | `test`, `mocktail` |
-
-### Adding a New Command
-
-1. Create a new file in `lib/src/commands/`
-2. Extend `Command<int>` from the `args` package
-3. Register it in `bin/main.dart` via `runner.addCommand()`
-4. Export it in `lib/src/commands/commands.dart`
-
-### Adding a New Brick Template
-
-1. Create a new directory at `lib/src/templates/bricks/<brick_name>/`
-2. Add a `brick.yaml` with required variables
-3. Create template files in `__brick__/` using Mustache syntax
-4. Load the brick in your command using `MasonGenerator.fromBrick(Brick.path(...))`
 
 ### Mustache Conventions
 

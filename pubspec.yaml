@@ -18,4 +18,6 @@ dev_dependencies:
   mocktail: ^1.0.4
 
 executables:
+  setup_my_flutter: setup_my_flutter
   smf: main
+  create: create

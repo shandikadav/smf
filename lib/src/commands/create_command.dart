@@ -8,6 +8,8 @@ import 'package:path/path.dart' as p;
 import '../core/cli_exception.dart';
 import '../core/rollback.dart';
 import '../core/shell_runner.dart';
+import '../templates/bundles/feature_bundle.dart';
+import '../templates/bundles/project_structure_bundle.dart';
 import '../utils/string_utils.dart';
 import 'presets.dart';
 
@@ -110,18 +112,7 @@ class CreateCommand extends Command<int> {
         );
       }
 
-      final brickPath = p.join(
-        _getPackageRoot(),
-        'lib',
-        'src',
-        'templates',
-        'bricks',
-        'project_structure',
-      );
-
-      final generator = await MasonGenerator.fromBrick(
-        Brick.path(brickPath),
-      );
+      final generator = await MasonGenerator.fromBundle(projectStructureBundle);
 
       final targetLib = Directory(p.join(projectDir.path, 'lib'));
 
@@ -149,18 +140,8 @@ class CreateCommand extends Command<int> {
         fileConflictResolution: FileConflictResolution.overwrite,
       );
 
-      final featureBrickPath = p.join(
-        _getPackageRoot(),
-        'lib',
-        'src',
-        'templates',
-        'bricks',
-        'feature',
-      );
-
-      final featureGenerator = await MasonGenerator.fromBrick(
-        Brick.path(featureBrickPath),
-      );
+      final featureGenerator =
+          await MasonGenerator.fromBundle(featureBundle);
 
       final featuresDir = Directory(
         p.join(projectDir.path, 'lib', 'features'),
@@ -207,13 +188,5 @@ class CreateCommand extends Command<int> {
         mitigation: e.toString(),
       );
     }
-  }
-
-  String _getPackageRoot() {
-    final scriptUri = Platform.script;
-    if (scriptUri.scheme == 'file') {
-      return p.dirname(p.dirname(scriptUri.toFilePath()));
-    }
-    return Directory.current.path;
   }
 }

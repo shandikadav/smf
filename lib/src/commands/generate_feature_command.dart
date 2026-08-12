@@ -6,6 +6,7 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as p;
 
 import '../core/cli_exception.dart';
+import '../templates/bundles/feature_bundle.dart';
 import '../utils/file_manager.dart';
 import '../utils/string_utils.dart';
 
@@ -86,18 +87,7 @@ class GenerateFeatureCommand extends Command<int> {
     final progress = logger.progress('Generating feature "$featureName"');
 
     try {
-      final brickPath = p.join(
-        _getPackageRoot(),
-        'lib',
-        'src',
-        'templates',
-        'bricks',
-        'feature',
-      );
-
-      final generator = await MasonGenerator.fromBrick(
-        Brick.path(brickPath),
-      );
+      final generator = await MasonGenerator.fromBundle(featureBundle);
 
       final targetDir = Directory(featuresDir);
       FileManager.ensureDirectory(featuresDir);
@@ -132,13 +122,5 @@ class GenerateFeatureCommand extends Command<int> {
         mitigation: e.toString(),
       );
     }
-  }
-
-  String _getPackageRoot() {
-    final scriptUri = Platform.script;
-    if (scriptUri.scheme == 'file') {
-      return p.dirname(p.dirname(scriptUri.toFilePath()));
-    }
-    return Directory.current.path;
   }
 }

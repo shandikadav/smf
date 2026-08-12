@@ -3,6 +3,8 @@ include: package:lints/recommended.yaml
 analyzer:
   exclude:
     - "lib/src/templates/bricks/**"
+    - "lib/src/templates/bundles/**"
+    - "tool/**"
 
 linter:
   rules:
