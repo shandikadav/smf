@@ -1,0 +1,15 @@
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - "lib/src/templates/bricks/**"
+
+linter:
+  rules:
+    - prefer_single_quotes
+    - require_trailing_commas
+    - sort_constructors_first
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - avoid_print
+    - unawaited_futures

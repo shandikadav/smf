@@ -1,0 +1,16 @@
+name: feature
+description: Generates a single Feature-First feature folder structure.
+version: 0.1.0
+
+vars:
+  feature_name:
+    type: string
+    description: The feature name in snake_case.
+  use_bloc:
+    type: boolean
+    description: Whether to use BLoC state management.
+    default: true
+  use_riverpod:
+    type: boolean
+    description: Whether to use Riverpod state management.
+    default: false

@@ -1,0 +1,24 @@
+name: project_structure
+description: Generates Feature-First Flutter project structure.
+version: 0.1.0
+
+vars:
+  project_name:
+    type: string
+    description: The project name in snake_case.
+  use_bloc:
+    type: boolean
+    description: Whether to use BLoC state management.
+    default: true
+  use_riverpod:
+    type: boolean
+    description: Whether to use Riverpod state management.
+    default: false
+  use_firebase:
+    type: boolean
+    description: Whether to include Firebase setup.
+    default: false
+  is_preset_enterprise:
+    type: boolean
+    description: Whether this is an Enterprise preset.
+    default: false
