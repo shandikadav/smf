@@ -140,8 +140,7 @@ class CreateCommand extends Command<int> {
         fileConflictResolution: FileConflictResolution.overwrite,
       );
 
-      final featureGenerator =
-          await MasonGenerator.fromBundle(featureBundle);
+      final featureGenerator = await MasonGenerator.fromBundle(featureBundle);
 
       final featuresDir = Directory(
         p.join(projectDir.path, 'lib', 'features'),
