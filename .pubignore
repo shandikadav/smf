@@ -1,0 +1,29 @@
+# Exclude mason brick templates from pub.dev validation.
+# These .dart files inside __brick__ are code templates (not compilable Dart
+# code for this package) and intentionally import packages like flutter,
+# go_router, dio which are NOT dependencies of this CLI tool.
+lib/src/templates/bricks/**/
+
+# Exclude tool scripts (not part of the public API)
+tool/
+
+# Dart tooling
+.dart_tool/
+.packages
+build/
+pubspec.lock
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage/
+
+# CLAUDE
+CLAUDE.md
