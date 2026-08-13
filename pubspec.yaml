@@ -1,6 +1,6 @@
 name: setup_my_flutter
 description: A Dart CLI tool to scaffold Flutter projects with Feature-First architecture.
-version: 1.0.0
+version: 1.0.0+1
 repository: https://github.com/shandikadav/smf
 
 environment:
