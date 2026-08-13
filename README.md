@@ -35,7 +35,7 @@ A CLI tool for scaffolding Flutter projects with **Feature-First** architecture.
 **Option A — Global activate (recommended):**
 
 ```bash
-dart pub global activate --source path .
+dart pub global activate setup_my_flutter
 ```
 
 Now you can use `smf` from anywhere:
