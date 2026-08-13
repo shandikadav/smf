@@ -25,7 +25,12 @@ List<String> getPresetPackages({
     case StateManagement.bloc:
       packages.addAll(['flutter_bloc', 'equatable']);
     case StateManagement.riverpod:
-      packages.addAll(['flutter_riverpod', 'riverpod_annotation']);
+      // Pin to Riverpod v2 — riverpod v3 (>=3.4.2) conflicts with
+      // envied_generator through analyzer version constraints.
+      packages.addAll([
+        'flutter_riverpod:^2.6.1',
+        'riverpod_annotation:^2.6.1',
+      ]);
   }
 
   packages.addAll([
@@ -61,7 +66,8 @@ List<String> getDevDependencies({
   ];
 
   if (stateManagement == StateManagement.riverpod) {
-    devDeps.add('riverpod_generator');
+    // Pin to riverpod_generator v2 to match flutter_riverpod ^2.6.1.
+    devDeps.add('riverpod_generator:^2.6.4');
   }
 
   return devDeps;
