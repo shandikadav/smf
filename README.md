@@ -1,5 +1,9 @@
 # 🚀 Setup My Flutter (SMF)
 
+[![pub.dev](https://img.shields.io/pub/v/setup_my_flutter.svg)](https://pub.dev/packages/setup_my_flutter)
+[![License: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+[![Dart SDK](https://img.shields.io/badge/dart-%3E%3D3.0.0-0175C2.svg)](https://dart.dev)
+
 A CLI tool for scaffolding Flutter projects with **Feature-First** architecture. Built with **Dart**, **Mason Engine**, and **interactive prompts** via `mason_logger`.
 
 ---
@@ -120,6 +124,44 @@ smf generate feature auth --force
 The command auto-detects your state management from `pubspec.yaml`:
 - `flutter_bloc` found → generates BLoC files (event, state, bloc)
 - `flutter_riverpod` found → generates Riverpod provider files
+
+---
+
+## 📜 CLI Reference
+
+### Global flags
+
+```
+Usage: smf <command> [arguments]
+
+Global options:
+-h, --help       Print this usage information.
+-v, --version    Print the current SMF version.
+
+Available commands:
+  create     Create a new Flutter project with Feature-First architecture.
+  generate   Generate project components (features, etc.).
+  version    Print the current version of SMF.
+
+Run "smf help <command>" for more information about a command.
+```
+
+### Print version
+
+```bash
+smf --version   # smf version 1.0.0+1
+smf -v          # smf version 1.0.0+1
+smf version     # smf version 1.0.0+1
+```
+
+### Get help for a specific command
+
+```bash
+smf help create
+smf help generate
+smf create --help
+smf generate feature --help
+```
 
 ---
 
