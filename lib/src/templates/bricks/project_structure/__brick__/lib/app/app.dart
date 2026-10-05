@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-{{#use_bloc}}import 'package:flutter_bloc/flutter_bloc.dart';{{/use_bloc}}
 {{#use_riverpod}}import 'package:flutter_riverpod/flutter_riverpod.dart';{{/use_riverpod}}
+import '../core/theme/app_theme.dart';
 import 'router/app_router.dart';
 
 class App extends StatelessWidget {
@@ -13,19 +13,15 @@ class App extends StatelessWidget {
     {{#use_riverpod}}return ProviderScope(
       child: MaterialApp.router(
         title: '{{project_name.titleCase()}}',
-        theme: ThemeData(
-          colorSchemeSeed: Colors.deepPurple,
-          useMaterial3: true,
-        ),
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
         routerConfig: router,
       ),
     );{{/use_riverpod}}
     {{^use_riverpod}}return MaterialApp.router(
       title: '{{project_name.titleCase()}}',
-      theme: ThemeData(
-        colorSchemeSeed: Colors.deepPurple,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       routerConfig: router,
     );{{/use_riverpod}}
   }

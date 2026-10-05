@@ -1,7 +1,7 @@
 import 'package:args/command_runner.dart';
 import 'package:mason_logger/mason_logger.dart';
 
-const String smfVersion = '1.0.0+1';
+const String smfVersion = '2.0.0';
 
 class VersionCommand extends Command<int> {
   VersionCommand({required this.logger});

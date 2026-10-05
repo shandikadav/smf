@@ -7,6 +7,14 @@ lib/src/templates/bricks/**/
 # Exclude tool scripts (not part of the public API)
 tool/
 
+# Repository tests require the raw bricks excluded above.
+test/
+
+# Local environment values must not enter the published archive.
+.env
+.env.*
+!.env.example
+
 # Dart tooling
 .dart_tool/
 .packages

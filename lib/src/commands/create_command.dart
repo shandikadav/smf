@@ -10,13 +10,15 @@ import '../core/rollback.dart';
 import '../core/shell_runner.dart';
 import '../templates/bundles/feature_bundle.dart';
 import '../templates/bundles/project_structure_bundle.dart';
+import '../utils/file_manager.dart';
 import '../utils/string_utils.dart';
 import 'presets.dart';
 
 class CreateCommand extends Command<int> {
-  CreateCommand({required this.logger});
+  CreateCommand({required this.logger, this.shellRunner});
 
   final Logger logger;
+  final ShellRunner? shellRunner;
 
   @override
   String get name => 'create';
@@ -27,7 +29,7 @@ class CreateCommand extends Command<int> {
 
   @override
   Future<int> run() async {
-    final shell = ShellRunner(logger: logger);
+    final shell = shellRunner ?? ShellRunner(logger: logger);
     final rollback = Rollback(logger: logger);
 
     try {
@@ -44,6 +46,9 @@ class CreateCommand extends Command<int> {
         );
       }
 
+      final destination = p.join(Directory.current.path, projectName);
+      _ensureDestinationAvailable(destination, projectName);
+
       final stateManagement = logger.chooseOne<StateManagement>(
         'Select state management:',
         choices: StateManagement.values,
@@ -57,35 +62,40 @@ class CreateCommand extends Command<int> {
       );
 
       final useFirebase = logger.confirm(
-        'Include Firebase integration?',
+        'Include Firebase packages?',
         defaultValue: false,
       );
 
       logger.info('');
-      logger.info(
-        '${lightCyan.wrap('📋 Summary:')}',
-      );
+      logger.info('${lightCyan.wrap('📋 Summary:')}');
       logger.info('  Project:    $projectName');
       logger.info('  State Mgmt: ${stateManagement.displayName}');
       logger.info('  Preset:     ${preset.displayName}');
       logger.info('  Firebase:   ${useFirebase ? 'Yes' : 'No'}');
       logger.info('');
 
-      final proceed =
-          logger.confirm('Proceed with creation?', defaultValue: true);
+      final proceed = logger.confirm(
+        'Proceed with creation?',
+        defaultValue: true,
+      );
       if (!proceed) {
         logger.info('Aborted.');
         return ExitCode.success.code;
       }
 
-      final projectDir = Directory(p.join(Directory.current.path, projectName));
+      final projectDir = Directory.current.createTempSync(
+        '.smf_${projectName}_',
+      );
       rollback.track(projectDir);
 
-      await shell.run(
-        'flutter',
-        ['create', '--org', 'com.example', projectName],
-        description: 'Creating Flutter project "$projectName"',
-      );
+      await shell.run('flutter', [
+        'create',
+        '--org',
+        'com.example',
+        '--project-name',
+        projectName,
+        projectDir.path,
+      ], description: 'Creating Flutter project "$projectName"');
 
       final packages = getPresetPackages(
         preset: preset,
@@ -142,9 +152,7 @@ class CreateCommand extends Command<int> {
 
       final featureGenerator = await MasonGenerator.fromBundle(featureBundle);
 
-      final featuresDir = Directory(
-        p.join(projectDir.path, 'lib', 'features'),
-      );
+      final featuresDir = Directory(p.join(projectDir.path, 'lib', 'features'));
 
       final featureTarget = DirectoryGeneratorTarget(featuresDir);
 
@@ -158,6 +166,8 @@ class CreateCommand extends Command<int> {
         fileConflictResolution: FileConflictResolution.overwrite,
       );
 
+      FileManager.removeEmptyDartTemplates(targetLib);
+
       final envFile = File(p.join(projectDir.path, '.env'));
       if (preset == Preset.enterprise) {
         envFile.writeAsStringSync(
@@ -166,6 +176,37 @@ class CreateCommand extends Command<int> {
       } else {
         envFile.writeAsStringSync('BASE_URL=https://api.example.com\n');
       }
+
+      envFile.copySync(p.join(projectDir.path, '.env.example'));
+      final gitignore = File(p.join(projectDir.path, '.gitignore'));
+      final existingIgnore = gitignore.existsSync()
+          ? gitignore.readAsStringSync()
+          : '';
+      gitignore.writeAsStringSync(
+        '$existingIgnore\n'
+        '# Environment configuration and generated values\n'
+        '.env\n'
+        '.env.*\n'
+        '!.env.example\n'
+        '**/*.g.dart\n',
+      );
+
+      await shell.run(
+        'dart',
+        ['run', 'build_runner', 'build'],
+        workingDirectory: projectDir.path,
+        description: 'Generating environment configuration',
+      );
+
+      await shell.run(
+        'dart',
+        ['format', 'lib', 'test'],
+        workingDirectory: projectDir.path,
+        description: 'Formatting generated code',
+      );
+
+      _ensureDestinationAvailable(destination, projectName);
+      projectDir.renameSync(destination);
 
       rollback.clear();
       logger.info('');
@@ -185,6 +226,16 @@ class CreateCommand extends Command<int> {
       throw CliException(
         message: 'An unexpected error occurred during project creation.',
         mitigation: e.toString(),
+      );
+    }
+  }
+
+  void _ensureDestinationAvailable(String path, String projectName) {
+    if (FileSystemEntity.typeSync(path, followLinks: false) !=
+        FileSystemEntityType.notFound) {
+      throw CliException(
+        message: 'Project destination "$projectName" already exists.',
+        mitigation: 'Choose a different name or move the existing path first.',
       );
     }
   }

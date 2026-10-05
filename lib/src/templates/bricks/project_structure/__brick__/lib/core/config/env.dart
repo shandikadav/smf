@@ -15,7 +15,7 @@ abstract class Env {
   static const String baseUrl = _Env.baseUrl;
 
   @EnviedField(varName: 'API_KEY', obfuscate: true)
-  static const String apiKey = _Env.apiKey;
+  static final String apiKey = _Env.apiKey;
 }
 {{/is_preset_enterprise}}{{^is_preset_enterprise}}/// Environment configuration loaded at build time via envied.
 ///

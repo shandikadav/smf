@@ -25,47 +25,24 @@ List<String> getPresetPackages({
     case StateManagement.bloc:
       packages.addAll(['flutter_bloc', 'equatable']);
     case StateManagement.riverpod:
-      packages.addAll([
-        'flutter_riverpod:^2.6.1',
-        'riverpod_annotation:^2.6.1',
-      ]);
+      packages.add('flutter_riverpod:^3.0.0');
   }
 
-  packages.addAll([
-    'go_router',
-    'dio',
-    'shared_preferences',
-    'envied',
-  ]);
+  packages.addAll(['go_router', 'dio', 'shared_preferences', 'envied']);
 
   if (preset == Preset.enterprise) {
-    packages.addAll([
-      'flutter_secure_storage',
-      'easy_localization',
-    ]);
+    packages.addAll(['flutter_secure_storage', 'easy_localization']);
   }
 
   if (useFirebase) {
-    packages.addAll([
-      'firebase_core',
-      'firebase_analytics',
-    ]);
+    packages.addAll(['firebase_core', 'firebase_analytics']);
   }
 
   return packages;
 }
 
-List<String> getDevDependencies({
-  required StateManagement stateManagement,
-}) {
-  final devDeps = <String>[
-    'envied_generator',
-    'build_runner',
-  ];
-
-  if (stateManagement == StateManagement.riverpod) {
-    devDeps.add('riverpod_generator:^2.6.4');
-  }
+List<String> getDevDependencies({required StateManagement stateManagement}) {
+  final devDeps = <String>['envied_generator', 'build_runner'];
 
   return devDeps;
 }

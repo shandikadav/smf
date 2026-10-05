@@ -18,22 +18,32 @@ class {{feature_name.pascalCase()}}State {
   }
 }
 
-class {{feature_name.pascalCase()}}Notifier extends StateNotifier<{{feature_name.pascalCase()}}State> {
-  {{feature_name.pascalCase()}}Notifier() : super(const {{feature_name.pascalCase()}}State());
+class {{feature_name.pascalCase()}}Notifier extends Notifier<{{feature_name.pascalCase()}}State> {
+  bool _disposed = false;
+
+  @override
+  {{feature_name.pascalCase()}}State build() {
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
+    return const {{feature_name.pascalCase()}}State();
+  }
 
   Future<void> load() async {
+    if (_disposed) return;
     state = state.copyWith(status: {{feature_name.pascalCase()}}Status.loading);
     try {
       // TODO: Implement feature logic
+      if (_disposed) return;
       state = state.copyWith(status: {{feature_name.pascalCase()}}Status.success);
     } catch (_) {
+      if (_disposed) return;
       state = state.copyWith(status: {{feature_name.pascalCase()}}Status.failure);
     }
   }
 }
 
 final {{feature_name.camelCase()}}Provider =
-    StateNotifierProvider<{{feature_name.pascalCase()}}Notifier, {{feature_name.pascalCase()}}State>(
-  (ref) => {{feature_name.pascalCase()}}Notifier(),
+    NotifierProvider<{{feature_name.pascalCase()}}Notifier, {{feature_name.pascalCase()}}State>(
+  {{feature_name.pascalCase()}}Notifier.new,
 );
 {{/use_riverpod}}

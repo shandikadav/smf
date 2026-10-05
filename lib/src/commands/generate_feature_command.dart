@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide Logger;
 import 'package:mason_logger/mason_logger.dart';
 import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
 
 import '../core/cli_exception.dart';
 import '../templates/bundles/feature_bundle.dart';
@@ -17,6 +18,11 @@ class GenerateFeatureCommand extends Command<int> {
       abbr: 'f',
       help: 'Overwrite existing feature directory if it exists.',
       negatable: false,
+    );
+    argParser.addOption(
+      'state-management',
+      allowed: ['bloc', 'riverpod'],
+      help: 'Select state management when both packages are installed.',
     );
   }
 
@@ -73,9 +79,59 @@ class GenerateFeatureCommand extends Command<int> {
       );
     }
 
-    final pubspecContent = pubspecFile.readAsStringSync();
-    final useBloc = pubspecContent.contains('flutter_bloc');
-    final useRiverpod = pubspecContent.contains('flutter_riverpod');
+    final YamlMap pubspec;
+    try {
+      final document = loadYaml(pubspecFile.readAsStringSync());
+      if (document is! YamlMap) {
+        throw const FormatException('Expected a YAML mapping.');
+      }
+      pubspec = document;
+    } on FormatException catch (e) {
+      throw CliException(
+        message: 'Invalid pubspec.yaml.',
+        mitigation: e.toString(),
+      );
+    }
+
+    final dependencies = pubspec['dependencies'];
+    if (dependencies != null && dependencies is! YamlMap) {
+      throw const CliException(
+        message: 'Invalid dependencies in pubspec.yaml.',
+        mitigation: 'The dependencies section must be a YAML mapping.',
+      );
+    }
+    final hasBloc =
+        dependencies is YamlMap && dependencies.containsKey('flutter_bloc');
+    final hasRiverpod =
+        dependencies is YamlMap && dependencies.containsKey('flutter_riverpod');
+    final selection = args['state-management'] as String?;
+
+    if (hasBloc && hasRiverpod && selection == null) {
+      throw const CliException(
+        message: 'Both BLoC and Riverpod are installed.',
+        mitigation:
+            'Choose --state-management bloc or --state-management riverpod.',
+      );
+    }
+    if ((selection == 'bloc' && !hasBloc) ||
+        (selection == 'riverpod' && !hasRiverpod)) {
+      throw CliException(
+        message: 'The selected state management package is not installed.',
+        mitigation:
+            'Add ${selection == 'bloc' ? 'flutter_bloc' : 'flutter_riverpod'} '
+            'to dependencies in pubspec.yaml first.',
+      );
+    }
+    final useBloc = hasBloc && selection != 'riverpod';
+    final useRiverpod = hasRiverpod && selection != 'bloc';
+
+    if (useBloc && !dependencies.containsKey('equatable')) {
+      throw const CliException(
+        message: 'The BLoC template requires equatable.',
+        mitigation:
+            'Run flutter pub add equatable, then generate the feature again.',
+      );
+    }
 
     if (!useBloc && !useRiverpod) {
       logger.warn(
@@ -106,11 +162,17 @@ class GenerateFeatureCommand extends Command<int> {
             : FileConflictResolution.skip,
       );
 
+      FileManager.removeEmptyDartTemplates(Directory(featureDir));
+
       progress.complete('Feature "$featureName" generated');
 
       logger.info('');
       logger.success('[✓] Feature "$featureName" created at:');
       logger.info('    lib/features/$featureName/');
+      logger.info('Add ${featureName.toPascalCase()}Page to your router.');
+      if (useRiverpod) {
+        logger.info('Ensure ProviderScope wraps your app.');
+      }
       logger.info('');
 
       return ExitCode.success.code;

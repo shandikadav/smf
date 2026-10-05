@@ -1,355 +1,270 @@
-# 🚀 Setup My Flutter (SMF)
+# Setup My Flutter (SMF)
 
-[![pub.dev](https://img.shields.io/pub/v/setup_my_flutter.svg)](https://pub.dev/packages/setup_my_flutter)
-[![License: BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Dart SDK](https://img.shields.io/badge/dart-%3E%3D3.0.0-0175C2.svg)](https://dart.dev)
+[![pub package](https://img.shields.io/pub/v/setup_my_flutter.svg)](https://pub.dev/packages/setup_my_flutter)
+[![Dart SDK](https://img.shields.io/badge/Dart-%3E%3D3.8.0-blue.svg)](https://dart.dev)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
 
-A CLI tool for scaffolding Flutter projects with **Feature-First** architecture. Built with **Dart**, **Mason Engine**, and **interactive prompts** via `mason_logger`.
+A Dart CLI that scaffolds Flutter projects with a feature-first architecture, BLoC or Riverpod, routing, networking, and environment configuration.
 
----
+**Release status:** This README describes the upcoming **2.0.0** release. It is not published yet. The latest pub.dev release verified on 5 October 2026 is **1.0.0+1**. Commands that request version 2.0.0 will work after publication. To try these changes now, run `dart run bin/main.dart` from this source checkout.
 
-## ✨ Features
+See the [changelog](CHANGELOG.md), [migration guide](https://github.com/shandikadav/smf/blob/main/doc/migration-2.0.0.md), and [publishing guide](https://github.com/shandikadav/smf/blob/main/doc/publishing.md).
 
-- **Interactive CLI** — Guided wizard with prompts for project configuration
-- **Feature-First Architecture** — Clean architecture folder structure per feature (presentation, data, domain)
-- **Preset System** — Choose between **MVP** (lightweight) or **Enterprise** (full-featured)
-- **State Management** — Supports **BLoC** and **Riverpod** with conditional template generation
-- **Firebase Integration** — Optional `firebase_core` + `firebase_analytics` setup
-- **Multi-Flavor** — Enterprise preset auto-generates `dev`, `stg`, `prod` entry points
-- **Environment Config** — Auto-setup `envied` with `.env` file
-- **Rollback Mechanism** — Auto-cleanup if the process fails mid-way
-- **Idempotent Feature Generation** — Won't overwrite existing features (unless `--force` is used)
-- **Validation** — Validates project/feature names against Dart package naming rules
+## Requirements
 
----
+| Tool | Requirement for SMF 2.0.0 |
+| --- | --- |
+| Dart | `>=3.8.0 <4.0.0` |
+| Flutter | Installed and available on `PATH`; needed to create and verify apps |
+| Dependencies | Network access for package resolution, or a populated local package cache |
 
-## 📦 Requirements
+The Dart constraint applies to the CLI. Generated apps use packages resolved by `flutter pub add`; their current versions can require a newer Flutter/Dart SDK. Check your installation with `dart --version` and `flutter --version`.
 
-| Dependency | Version |
-|---|---|
-| Dart SDK | `>=3.0.0` |
-| Flutter SDK | Installed and available in `PATH` |
+## Install from pub.dev
 
----
+Activate the latest published release:
 
-## 📖 Guide
-
-### 1. Install the package
-
-**Option A — Global activate (recommended):**
-
-```bash
+```sh
 dart pub global activate setup_my_flutter
+smf --version
 ```
 
-Now you can use `smf` from anywhere:
+Run the same activation command to update an existing installation. After 2.0.0 is published, you can request it explicitly:
 
-```bash
-smf create
-smf generate feature auth
+```sh
+dart pub global activate setup_my_flutter 2.0.0
 ```
 
-**Option B — Add as a dev dependency in your project:**
+The package provides `smf` and `setup_my_flutter` for the full CLI, plus `create` as a shortcut for interactive project creation. If the executable is not found, add Dart's global package executable directory to your `PATH`, following the [Dart global activation documentation](https://dart.dev/tools/pub/cmd/pub-global#running-a-script-from-your-path).
+
+You can also add SMF to an existing Flutter project's `dev_dependencies`. This example targets the upcoming release:
 
 ```yaml
 dev_dependencies:
-  setup_my_flutter:
-    git:
-      url: <repo-url>
+  setup_my_flutter: ^2.0.0
 ```
 
-Then run:
-
-```bash
+```sh
 flutter pub get
-```
-
-### 2. Create a new project
-
-```bash
-# If globally activated
-smf create
-
-# If added as dev dependency
-dart run setup_my_flutter create
-```
-
-The CLI will walk you through an interactive wizard:
-
-```
-? Project name (snake_case): my_awesome_app
-❯ Select state management:
-    BLoC (flutter_bloc)
-    Riverpod (flutter_riverpod)
-❯ Select project preset:
-    MVP / Lite
-    Enterprise
-? Include Firebase integration? (y/N): N
-
-📋 Summary:
-  Project:    my_awesome_app
-  State Mgmt: BLoC (flutter_bloc)
-  Preset:     MVP / Lite
-  Firebase:   No
-
-? Proceed with creation? (Y/n): Y
-```
-
-What happens under the hood:
-
-1. Validates project name (snake_case)
-2. Runs `flutter create` with auto-rollback on failure
-3. Injects all dependencies via `flutter pub add`
-4. Generates Feature-First folder structure via Mason brick
-5. Creates `.env` file for envied configuration
-
-### 3. Generate a new feature
-
-Navigate to your Flutter project root, then:
-
-```bash
-# If globally activated
-smf generate feature auth
-
-# If added as dev dependency
+dart run setup_my_flutter --help
 dart run setup_my_flutter generate feature auth
 ```
 
-To overwrite an existing feature, use the `--force` flag:
+## Create a project
 
-```bash
+```sh
+smf create
+```
+
+The interactive prompts ask for a project name, state management, preset, optional Firebase packages, and confirmation. Use a lowercase `snake_case` name beginning with a letter and containing at least two characters; reserved Dart keywords are rejected.
+
+SMF creates the project in a temporary directory, installs dependencies, generates the scaffold and environment configuration, and formats the result. It moves the completed project to the requested directory only after those steps succeed. Existing destination files, directories, and symlinks are rejected. On failure, SMF removes its temporary directory.
+
+For a project named `my_app`:
+
+```sh
+cd my_app
+flutter analyze
+flutter test
+flutter run
+```
+
+The generated home page has a **Load** button wired to its BLoC or Riverpod notifier. The sample state changes from `initial` through `loading` to `success`. Replace the placeholder loading logic with your application's behavior.
+
+## Generate a feature
+
+Run this from the Flutter project root, beside `pubspec.yaml`:
+
+```sh
+smf generate feature auth
+```
+
+SMF reads the actual `dependencies` YAML mapping. Comments and `dev_dependencies` do not determine the generated state management.
+
+| Installed dependencies | Generated feature |
+| --- | --- |
+| `flutter_bloc` and `equatable` | BLoC, event, state, and a page using `BlocProvider`/`BlocBuilder` |
+| `flutter_riverpod` | Manual `NotifierProvider` and a `ConsumerWidget` page; supports Riverpod 2 and 3 |
+| Both state management packages | Explicit `--state-management` selection required |
+| Neither state management package | Stateless page and architecture folders, without state management files |
+
+For a project containing both packages:
+
+```sh
+smf generate feature auth --state-management bloc
+smf generate feature preferences --state-management riverpod
+```
+
+The selected package must be a direct dependency. For BLoC, add Equatable if it is missing:
+
+```sh
+flutter pub add equatable
+```
+
+For Riverpod, ensure `ProviderScope` wraps your app. SMF does this when creating a Riverpod project.
+
+Feature generation does not register a route automatically. In a project created by SMF, import the page in `lib/app/router/app_router.dart`:
+
+```dart
+import '../../features/auth/presentation/pages/auth_page.dart';
+```
+
+Add this entry to `AppRouter.router`'s `routes` list:
+
+```dart
+GoRoute(
+  path: '/auth',
+  name: 'auth',
+  builder: (context, state) => const AuthPage(),
+),
+```
+
+An existing feature is rejected by default. To regenerate it:
+
+```sh
 smf generate feature auth --force
 ```
 
-The command auto-detects your state management from `pubspec.yaml`:
-- `flutter_bloc` found → generates BLoC files (event, state, bloc)
-- `flutter_riverpod` found → generates Riverpod provider files
+`--force` overwrites matching generated files. Save custom changes first and review the resulting diff before continuing.
 
----
+## Presets
 
-## 📜 CLI Reference
+| Component | MVP / Lite | Enterprise |
+| --- | --- | --- |
+| State management | BLoC + Equatable, or Riverpod 3 | BLoC + Equatable, or Riverpod 3 |
+| Routing and HTTP | `go_router`, `dio` | `go_router`, `dio` |
+| Preferences | `shared_preferences` | `shared_preferences` |
+| Secure storage | — | `flutter_secure_storage` |
+| Localization package | — | `easy_localization` |
+| Environment | Envied `BASE_URL` | Envied `BASE_URL` and obfuscated `API_KEY` |
+| Entry points | `main.dart` | `main.dart`, `main_dev.dart`, `main_stg.dart`, `main_prod.dart` |
 
-### Global flags
+New Riverpod projects use `flutter_riverpod: ^3.0.0`. The templates use manual providers, so SMF does not install `riverpod_annotation` or `riverpod_generator`.
 
-```
-Usage: smf <command> [arguments]
+The Enterprise entry points initially launch the same app. You can select one with:
 
-Global options:
--h, --help       Print this usage information.
--v, --version    Print the current SMF version.
-
-Available commands:
-  create     Create a new Flutter project with Feature-First architecture.
-  generate   Generate project components (features, etc.).
-  version    Print the current version of SMF.
-
-Run "smf help <command>" for more information about a command.
+```sh
+flutter run -t lib/main_dev.dart
 ```
 
-### Print version
+Configure distinct environment values and native Android/iOS flavors yourself if your app needs them. The generator does not create native flavor definitions. Enterprise includes the localization package; translation assets, asset declarations, and localization initialization still need to be added for your app.
 
-```bash
-smf --version   # smf version 1.0.0+1
-smf -v          # smf version 1.0.0+1
-smf version     # smf version 1.0.0+1
+Selecting Firebase installs `firebase_core` and `firebase_analytics`. Configure your Firebase project, platform files, and initialization before using those services. The generated app does not initialize Firebase automatically.
+
+The data and domain layers are starting points. Implement models, repositories, entities, and use cases for your application.
+
+## Environment and networking
+
+Creation writes `.env` and `.env.example`. MVP includes:
+
+```dotenv
+BASE_URL=https://api.example.com
 ```
 
-### Get help for a specific command
+Enterprise also includes the placeholder `API_KEY=your_api_key_here`. Update the values in `.env`, then regenerate configuration:
 
-```bash
-smf help create
-smf help generate
-smf create --help
-smf generate feature --help
+```sh
+dart run build_runner build
 ```
 
----
+SMF runs this generation step during project creation. The generated `.gitignore` excludes `.env`, other `.env.*` files, and `*.g.dart`, while keeping `.env.example` available as a setup reference.
 
-## 📦 Project Presets
+After cloning a generated app, restore its local environment and generated files before building:
 
-### MVP / Lite
-
-Lightweight setup for rapid prototyping or small-to-medium projects.
-
-| Package | Purpose |
-|---|---|
-| `go_router` | Declarative routing |
-| `dio` | HTTP client |
-| `shared_preferences` | Local key-value storage |
-| `envied` | Environment variables (build-time) |
-| `flutter_bloc` / `flutter_riverpod` | State management (choose one) |
-
-Dev dependencies: `envied_generator`, `build_runner`
-
-### Enterprise
-
-All MVP packages **plus**:
-
-| Package | Purpose |
-|---|---|
-| `flutter_secure_storage` | Encrypted local storage |
-| `easy_localization` | Multi-language / i18n support |
-
-Additional features:
-- Multi-flavor entry points (`main_dev.dart`, `main_stg.dart`, `main_prod.dart`)
-- Extended `.env` config with obfuscated API key
-
----
-
-## 🏗 Generated Structure
-
-### Project Structure (from `smf create`)
-
+```sh
+cp .env.example .env
+# Edit .env with the values for this environment.
+flutter pub get
+dart run build_runner build
+flutter analyze
+flutter test
 ```
-my_awesome_app/
+
+Dio reads its base URL from `Env.baseUrl`. HTTP logging is enabled only in debug builds and excludes request/response headers and bodies.
+
+Envied embeds configuration into the compiled application. Obfuscation does not turn a client-side value into a server secret; keep privileged credentials on your backend. See the [Envied documentation](https://pub.dev/packages/envied).
+
+## Generated structure
+
+```text
+my_app/
+├── .env
+├── .env.example
 ├── lib/
 │   ├── main.dart
-│   ├── main_dev.dart              # Enterprise only
-│   ├── main_stg.dart              # Enterprise only
-│   ├── main_prod.dart             # Enterprise only
 │   ├── app/
-│   │   ├── app.dart               # Root widget (MaterialApp.router)
-│   │   └── router/
-│   │       └── app_router.dart    # GoRouter configuration
+│   │   ├── app.dart
+│   │   └── router/app_router.dart
 │   ├── core/
-│   │   ├── config/
-│   │   │   └── env.dart           # Envied environment config
-│   │   ├── constants/
-│   │   │   └── app_constants.dart
-│   │   ├── network/
-│   │   │   └── dio_client.dart    # Configured Dio singleton
-│   │   ├── theme/
-│   │   │   └── app_theme.dart     # Material 3 theme
-│   │   └── utils/
+│   │   ├── config/env.dart
+│   │   ├── constants/app_constants.dart
+│   │   ├── network/dio_client.dart
+│   │   └── theme/app_theme.dart
 │   └── features/
 │       └── home/
-│           ├── presentation/
-│           │   ├── pages/
-│           │   │   └── home_page.dart
-│           │   ├── widgets/
-│           │   └── bloc/          # BLoC files (if BLoC is selected)
-│           │       ├── home_bloc.dart
-│           │       ├── home_event.dart
-│           │       └── home_state.dart
 │           ├── data/
-│           │   ├── repositories/
-│           │   └── models/
-│           └── domain/
-│               ├── entities/
-│               └── usecases/
-├── .env                           # Environment variables
-├── pubspec.yaml
-└── ...
+│           │   ├── models/
+│           │   └── repositories/
+│           ├── domain/
+│           │   ├── entities/
+│           │   └── usecases/
+│           └── presentation/
+│               ├── bloc/ or providers/
+│               ├── pages/home_page.dart
+│               └── widgets/
+├── test/widget_test.dart
+└── pubspec.yaml
 ```
 
-### Feature Structure (from `smf generate feature`)
+The state management folder depends on your selection. Empty Dart files from disabled template sections are removed. Enterprise adds the extra entry points listed above. Flutter also creates the platform directories for the installed SDK's default targets.
 
-```
-lib/features/<feature_name>/
-├── presentation/
-│   ├── pages/
-│   │   └── <feature_name>_page.dart
-│   ├── widgets/
-│   └── bloc/                      # or providers/ for Riverpod
-│       ├── <feature_name>_bloc.dart
-│       ├── <feature_name>_event.dart
-│       └── <feature_name>_state.dart
-├── data/
-│   ├── repositories/
-│   └── models/
-└── domain/
-    ├── entities/
-    └── usecases/
-```
+## CLI reference
 
----
+| Command | Purpose |
+| --- | --- |
+| `smf create` | Start interactive project creation |
+| `smf generate feature <name>` | Generate a feature; prompts for a name if omitted |
+| `smf generate feature <name> --state-management bloc` | Choose BLoC explicitly |
+| `smf generate feature <name> --state-management riverpod` | Choose Riverpod explicitly |
+| `smf generate feature <name> --force` | Overwrite matching feature files |
+| `smf version`, `smf --version`, `smf -v` | Print the CLI version |
+| `smf --help` | Show available commands |
+| `smf generate feature --help` | Show feature options |
 
-## 🏛 Architecture
+## Troubleshooting
 
-```
-bin/
-├── main.dart                     # CLI entry point (smf)
-├── setup_my_flutter.dart         # Package entry point (dart run setup_my_flutter)
-└── create.dart                   # Direct create (dart run setup_my_flutter:create)
-lib/
-├── setup_my_flutter.dart         # Library barrel export
-└── src/
-    ├── commands/
-    │   ├── create_command.dart
-    │   ├── generate_command.dart
-    │   ├── generate_feature_command.dart
-    │   └── presets.dart
-    ├── core/
-    │   ├── cli_exception.dart
-    │   ├── rollback.dart
-    │   └── shell_runner.dart
-    ├── templates/
-    │   └── bricks/
-    │       ├── project_structure/
-    │       └── feature/
-    └── utils/
-        ├── file_manager.dart
-        └── string_utils.dart
-```
+| Symptom | Action |
+| --- | --- |
+| Destination already exists | Choose another project name or move the existing path. |
+| No `pubspec.yaml` found | Run feature generation from the Flutter project root. |
+| Both BLoC and Riverpod are installed | Pass `--state-management bloc` or `--state-management riverpod`. |
+| Equatable is missing | Run `flutter pub add equatable` for the BLoC template. |
+| Feature already exists | Use another name, or save your changes before using `--force`. |
+| `env.g.dart` is missing | Create `.env` and run `dart run build_runner build`. |
+| Package resolution fails | Read the Flutter/Dart SDK constraint error and update the SDK or adjust dependencies. |
 
-### Design Principles
+## Development and verification
 
-1. **Rollback Safety** — Every created directory is tracked. If the process fails, everything is automatically cleaned up to prevent dirty state.
-2. **No Raw pubspec.yaml Edits** — Dependencies are always added via `flutter pub add`, never through string manipulation.
-3. **User-Friendly Errors** — All exceptions are wrapped in `CliException` with clear messages and mitigation steps. No raw stack traces are shown to the user.
-4. **Idempotency** — `generate feature` will not overwrite an existing folder unless the `--force` flag is explicitly provided.
-5. **Validation First** — Project and feature names are validated before any subprocess is executed.
+Use a source checkout for development. The published package contains bundled templates; raw Mason bricks, repository tests, and maintenance tools are excluded from the pub archive.
 
----
-
-## 🛠 Development
-
-```bash
-# Install dependencies
+```sh
 dart pub get
-
-# Run CLI locally
-dart run bin/main.dart create
-dart run bin/main.dart generate feature auth
-
-# Analyze code
 dart analyze
-
-# Format code
-dart format .
-
-# Run tests
 dart test
-
-# Compile to standalone binary
-dart compile exe bin/main.dart -o build/smf          # macOS / Linux
-dart compile exe bin/main.dart -o build/smf.exe      # Windows
+dart run tool/verify_scaffolds.dart
 ```
 
-### Tech Stack
+The verification tool creates BLoC and Riverpod projects for both presets, generates extra features, and runs Flutter analysis and widget tests. It also checks feature generation in a Riverpod 2 project. Firebase packages are disabled in this verification matrix.
 
-| Component | Package |
-|---|---|
-| CLI Framework | `args` (CommandRunner) |
-| Templating | `mason` (MasonGenerator + Brick) |
-| Logger / Prompts | `mason_logger` |
-| YAML Manipulation | `yaml_edit` |
-| Path Resolution | `path` |
-| Testing | `test`, `mocktail` |
+For cached dependencies or a smaller run:
 
-### Mustache Conventions
+```sh
+dart run tool/verify_scaffolds.dart --offline --keep
+dart run tool/verify_scaffolds.dart --preset enterprise
+```
 
-| Convention | Example |
-|---|---|
-| Variable (snake_case) | `{{feature_name}}` |
-| PascalCase | `{{feature_name.pascalCase()}}` |
-| camelCase | `{{feature_name.camelCase()}}` |
-| titleCase | `{{feature_name.titleCase()}}` |
-| Conditional (opt-in) | `{{#use_firebase}} ... {{/use_firebase}}` |
-| Conditional (negative) | `{{^use_riverpod}} ... {{/use_riverpod}}` |
+See [Publishing SMF](https://github.com/shandikadav/smf/blob/main/doc/publishing.md) for bundle rebuilding, release checks, and pub.dev publication.
 
----
+## License
 
-## 📄 License
-
-BSD 3-Clause License — See [LICENSE](LICENSE) for details.
+[BSD 3-Clause](LICENSE).

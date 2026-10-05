@@ -16,8 +16,10 @@ class {{feature_name.pascalCase()}}Bloc
     emit(state.copyWith(status: {{feature_name.pascalCase()}}Status.loading));
     try {
       // TODO: Implement feature logic
+      if (emit.isDone) return;
       emit(state.copyWith(status: {{feature_name.pascalCase()}}Status.success));
     } catch (_) {
+      if (emit.isDone) return;
       emit(state.copyWith(status: {{feature_name.pascalCase()}}Status.failure));
     }
   }

@@ -30,4 +30,17 @@ class FileManager {
     file.writeAsStringSync(content);
     return file;
   }
+
+  /// Removes empty Dart files left by disabled template sections.
+  static void removeEmptyDartTemplates(Directory directory) {
+    if (!directory.existsSync()) return;
+    for (final entity in directory.listSync(followLinks: false)) {
+      if (entity is File && entity.path.endsWith('.dart')) {
+        if (entity.readAsStringSync().trim().isEmpty) entity.deleteSync();
+      } else if (entity is Directory) {
+        removeEmptyDartTemplates(entity);
+        if (entity.listSync().isEmpty) entity.deleteSync();
+      }
+    }
+  }
 }

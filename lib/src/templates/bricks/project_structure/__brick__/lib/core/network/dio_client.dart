@@ -1,4 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+
+import '../config/env.dart';
 
 /// Configured Dio HTTP client.
 class DioClient {
@@ -7,8 +10,13 @@ class DioClient {
   static Dio? _instance;
 
   static Dio get instance {
-    _instance ??= Dio(
+    return _instance ??= _createClient();
+  }
+
+  static Dio _createClient() {
+    final client = Dio(
       BaseOptions(
+        baseUrl: Env.baseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         headers: {
@@ -16,13 +24,20 @@ class DioClient {
           'Accept': 'application/json',
         },
       ),
-    )..interceptors.addAll([
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-        ),
-      ]);
+    );
 
-    return _instance!;
+    if (kDebugMode) {
+      client.interceptors.add(
+        LogInterceptor(
+          request: false,
+          requestHeader: false,
+          requestBody: false,
+          responseHeader: false,
+          responseBody: false,
+        ),
+      );
+    }
+
+    return client;
   }
 }
